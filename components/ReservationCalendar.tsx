@@ -152,11 +152,11 @@ export default function ReservationCalendar() {
               const isSelected = dayPanel === dateStr
 
               return (
-                <div className={`w-full h-full min-h-[52px] sm:min-h-[72px] px-1 pt-1 pb-1.5 transition-colors ${
+                <div className={`w-full h-full min-h-[60px] sm:min-h-[80px] px-0.5 pt-1 pb-1 transition-colors ${
                   isSelected ? 'bg-blue-50' : ''
                 } ${isPast ? 'opacity-40' : ''}`}>
                   {/* 日付数字 */}
-                  <div className={`text-right text-xs font-medium mb-1.5 ${
+                  <div className={`text-right text-xs font-medium mb-1 pr-0.5 ${
                     isSelected ? 'text-blue-600' : 'text-gray-500'
                   }`}>
                     {arg.date.getDate()}
@@ -165,18 +165,16 @@ export default function ReservationCalendar() {
                   <div className="flex flex-col gap-0.5">
                     {SLOTS.map((slot) => {
                       const r = rList.find((x) => x.slot === slot)
+                      const label = slot === '昼' ? '昼' : '放'
                       return (
-                        <div key={slot} className="flex items-center gap-1">
-                          {/* ドット */}
-                          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                            r ? slotBg[slot] : 'bg-gray-400'
-                          }`} />
-                          {/* テキスト（大きい画面のみ） */}
-                          <span className={`hidden sm:block text-[9px] truncate leading-tight ${
-                            r ? 'text-gray-700 font-medium' : 'text-gray-500'
-                          }`}>
-                            {r ? r.name : slot === '昼' ? '昼空き' : '放後空き'}
-                          </span>
+                        <div key={slot} className={`rounded text-[8px] sm:text-[10px] font-bold leading-none px-1 py-[3px] truncate ${
+                          r
+                            ? `${slotBg[slot]} text-white`
+                            : slot === '昼'
+                              ? 'bg-amber-100 text-amber-600'
+                              : 'bg-blue-100 text-blue-600'
+                        }`}>
+                          {r ? `${label} ${r.name}` : `${label} 空き`}
                         </div>
                       )
                     })}

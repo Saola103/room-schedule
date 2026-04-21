@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "理科講義室 予約カレンダー",
-  description: "学校の理科講義室の予約システム",
+  description: "理科講義室の予約システム",
 };
 
 export default function RootLayout({

@@ -128,8 +128,8 @@ export default function ReservationCalendar() {
           <span className="flex items-center gap-1.5 text-xs text-gray-600">
             <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block" />放課後
           </span>
-          <span className="flex items-center gap-1.5 text-xs text-gray-400">
-            <span className="w-2.5 h-2.5 rounded-full bg-gray-300 inline-block" />埋まり
+          <span className="flex items-center gap-1.5 text-xs text-gray-500">
+            <span className="w-2.5 h-2.5 rounded-full bg-gray-400 inline-block" />空き
           </span>
         </div>
 
@@ -168,11 +168,11 @@ export default function ReservationCalendar() {
                         <div key={slot} className="flex items-center gap-1">
                           {/* ドット */}
                           <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                            r ? slotBg[slot] : 'bg-gray-200'
+                            r ? slotBg[slot] : 'bg-gray-400'
                           }`} />
                           {/* テキスト（大きい画面のみ） */}
                           <span className={`hidden sm:block text-[9px] truncate leading-tight ${
-                            r ? 'text-gray-700 font-medium' : 'text-gray-300'
+                            r ? 'text-gray-700 font-medium' : 'text-gray-500'
                           }`}>
                             {r ? r.name : slot === '昼' ? '昼空き' : '放後空き'}
                           </span>

@@ -144,7 +144,8 @@ export default function ReservationCalendar() {
             headerToolbar={{ left: 'prev,next today', center: 'title', right: '' }}
             buttonText={{ today: '今日' }}
             dayCellContent={(arg) => {
-              const dateStr = arg.date.toISOString().split('T')[0]
+              const d = arg.date
+              const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
               const today = new Date(); today.setHours(0, 0, 0, 0)
               const isPast = arg.date < today
               const rList = reservationsForDate(dateStr)

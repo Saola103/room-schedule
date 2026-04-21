@@ -170,9 +170,7 @@ export default function ReservationCalendar() {
                         <div key={slot} className={`rounded text-[8px] sm:text-[10px] font-bold leading-none px-1 py-[3px] truncate ${
                           r
                             ? `${slotBg[slot]} text-white`
-                            : slot === '昼'
-                              ? 'bg-amber-100 text-amber-600'
-                              : 'bg-blue-100 text-blue-600'
+                            : 'bg-gray-100 text-gray-400'
                         }`}>
                           {r ? `${label} ${r.name}` : `${label} 空き`}
                         </div>

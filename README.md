@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Auth choice
 
-## Getting Started
+This app now assumes `Supabase Auth` for school-email login.
 
-First, run the development server:
+- `better-auth` was not chosen because this repo already uses Supabase and the goal was to harden quickly without adding a second auth stack.
+- API access expects a Supabase access token in `Authorization: Bearer ...`.
+- Reservation data is no longer intended to be public.
+
+## Environment variables
+
+Create `.env.local`:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_URL=...
+SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+ALLOWED_EMAIL_DOMAINS=school.ac.jp
+NEXT_PUBLIC_ALLOWED_EMAIL_DOMAINS=school.ac.jp
+RESERVATION_ADMIN_EMAILS=teacher1@school.ac.jp,teacher2@school.ac.jp
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Notes:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `ALLOWED_EMAIL_DOMAINS`: server-side enforcement for API access.
+- `NEXT_PUBLIC_ALLOWED_EMAIL_DOMAINS`: client-side UX validation only.
+- `RESERVATION_ADMIN_EMAILS`: users allowed to delete reservations.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Database hardening
 
-## Learn More
+Run one of these in Supabase SQL Editor:
 
-To learn more about Next.js, take a look at the following resources:
+- Fresh setup: [supabase-setup.sql](/Users/subaru/Desktop/学校/room-schedule/supabase-setup.sql)
+- Existing project: [supabase-hardening.sql](/Users/subaru/Desktop/学校/room-schedule/supabase-hardening.sql)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+These scripts remove the old anonymous policies so the table is no longer publicly readable or writable.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Development
 
-## Deploy on Vercel
+```bash
+npm install --cache /tmp/room-schedule-npm-cache
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Open `http://localhost:3000`.

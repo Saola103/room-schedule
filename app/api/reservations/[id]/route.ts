@@ -25,10 +25,6 @@ export async function DELETE(
     return json({ error: auth.error }, { status: auth.status })
   }
 
-  if (!auth.user.isAdmin) {
-    return json({ error: '削除は管理者のみ可能です' }, { status: 403 })
-  }
-
   const { id } = await params
   if (!isValidReservationId(id)) {
     return json({ error: '予約IDが不正です' }, { status: 400 })

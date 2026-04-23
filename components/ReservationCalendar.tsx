@@ -27,6 +27,7 @@ export default function ReservationCalendar() {
   const [sessionToken, setSessionToken] = useState<string | null>(null)
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [booting, setBooting] = useState(true)
+  const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
   const [authLoading, setAuthLoading] = useState(false)
   const [error, setError] = useState('')
@@ -161,6 +162,7 @@ export default function ReservationCalendar() {
   }
 
   function openBookModal(date: string, slot: Slot) {
+    setName('')
     setError('')
     setModal({ type: 'book', date, slot })
   }
@@ -196,9 +198,8 @@ export default function ReservationCalendar() {
 
   async function handleCreate() {
     if (modal.type !== 'book' || !sessionToken) return
-    const reservationName = userEmail ? getReservationDisplayName(userEmail) : ''
-    if (!reservationName) {
-      setError('ログイン中のメールアドレスを確認できません')
+    if (!name.trim()) {
+      setError('名前を入力してください')
       return
     }
 
@@ -211,7 +212,7 @@ export default function ReservationCalendar() {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${sessionToken}`,
       },
-      body: JSON.stringify({ date: modal.date, slot: modal.slot, name: reservationName }),
+      body: JSON.stringify({ date: modal.date, slot: modal.slot, name: name.trim() }),
     })
     const data = await res.json().catch(() => null)
     setLoading(false)
@@ -452,14 +453,12 @@ export default function ReservationCalendar() {
                     {reservation ? (
                       <div className="flex items-center justify-between">
                         <p className="text-base font-semibold text-gray-800">{reservation.name}</p>
-                        {reservation.canDelete && (
-                          <button
-                            onClick={() => openDetailModal(reservation)}
-                            className="ml-2 text-xs text-gray-400 underline underline-offset-2 hover:text-red-500"
-                          >
-                            削除
-                          </button>
-                        )}
+                        <button
+                          onClick={() => openDetailModal(reservation)}
+                          className="ml-2 text-xs text-gray-400 underline underline-offset-2 hover:text-red-500"
+                        >
+                          削除
+                        </button>
                       </div>
                     ) : (
                       <button
@@ -494,6 +493,20 @@ export default function ReservationCalendar() {
               <h2 className="text-lg font-bold text-gray-800">{modal.slot}の予約</h2>
             </div>
             <p className="mb-5 text-sm text-gray-500">{formatDate(modal.date)}</p>
+            <div className="mb-4">
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                名前 <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && !e.nativeEvent.isComposing && void handleCreate()}
+                placeholder="例: 山田太郎"
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                autoFocus
+              />
+            </div>
             {error && <p className="mb-3 text-sm text-red-500">{error}</p>}
             <div className="mt-2 flex gap-3">
               <button

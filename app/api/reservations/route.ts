@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { authenticateRequest } from '@/lib/auth'
 import type { Reservation } from '@/lib/reservations'
-import { getReservationDisplayName, validateReservationPayload } from '@/lib/reservations'
+import { validateReservationPayload } from '@/lib/reservations'
 import { getClientIp, takeRateLimit } from '@/lib/security'
 import { getSupabaseAdmin } from '@/lib/supabase'
 
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
     return json({ error: '予約の取得に失敗しました' }, { status: 500 })
   }
 
-  return json((data ?? []).map((row) => toReservation(row, auth.user.isAdmin)))
+  return json((data ?? []).map((row) => toReservation(row, true)))
 }
 
 export async function POST(req: NextRequest) {
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
     .insert([
       {
         ...result.value,
-        name: getReservationDisplayName(auth.user.email),
+        name: result.value.name,
       },
     ])
     .select('id, date, slot, name, created_at')
@@ -122,5 +122,5 @@ export async function POST(req: NextRequest) {
     return json({ error: '予約の作成に失敗しました' }, { status: 500 })
   }
 
-  return json(toReservation(data, auth.user.isAdmin), { status: 201 })
+  return json(toReservation(data, true), { status: 201 })
 }

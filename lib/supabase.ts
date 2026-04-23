@@ -1,21 +1,38 @@
 import { createClient } from '@supabase/supabase-js'
 
-export type Slot = '昼' | '放課後'
-export const SLOTS: Slot[] = ['昼', '放課後']
+function getSupabaseUrl() {
+  const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
+  if (!url || url === 'your_supabase_project_url') {
+    throw new Error('SUPABASE_URL is not configured')
+  }
 
-export type Reservation = {
-  id: string
-  date: string
-  slot: Slot
-  name: string
-  created_at: string
+  return url
 }
 
-export function getSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!url || !key || url === 'your_supabase_project_url') {
-    throw new Error('Supabase environment variables are not configured')
+export function getSupabaseReadonly() {
+  const key = process.env.SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!key) {
+    throw new Error('SUPABASE_ANON_KEY is not configured')
   }
-  return createClient(url, key)
+
+  return createClient(getSupabaseUrl(), key, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  })
+}
+
+export function getSupabaseAdmin() {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!key) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY is not configured')
+  }
+
+  return createClient(getSupabaseUrl(), key, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  })
 }

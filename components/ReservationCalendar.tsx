@@ -19,22 +19,10 @@ type ModalState =
   | { type: 'book'; date: string; slot: Slot }
   | { type: 'detail'; reservation: Reservation }
 
-const ALLOWED_EMAIL_DOMAINS = (process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAINS ?? '')
-  .split(',')
-  .map((value) => value.trim().toLowerCase())
-  .filter(Boolean)
-
-function isAllowedSchoolEmail(email: string) {
-  const normalized = email.trim().toLowerCase()
-  if (ALLOWED_EMAIL_DOMAINS.length === 0) return true
-  return ALLOWED_EMAIL_DOMAINS.some((domain) => normalized.endsWith(`@${domain}`))
-}
-
 export default function ReservationCalendar() {
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [modal, setModal] = useState<ModalState>({ type: 'closed' })
   const [dayPanel, setDayPanel] = useState<string | null>(null)
-  const [email, setEmail] = useState('')
   const [supabaseReady, setSupabaseReady] = useState(false)
   const [sessionToken, setSessionToken] = useState<string | null>(null)
   const [userEmail, setUserEmail] = useState<string | null>(null)
@@ -43,7 +31,6 @@ export default function ReservationCalendar() {
   const [authLoading, setAuthLoading] = useState(false)
   const [error, setError] = useState('')
   const [authError, setAuthError] = useState('')
-  const [authMessage, setAuthMessage] = useState('')
   const panelRef = useRef<HTMLDivElement>(null)
 
   const fetchReservations = useCallback(async (token: string) => {
@@ -185,43 +172,24 @@ export default function ReservationCalendar() {
 
   async function handleSignIn() {
     const supabase = getSupabaseBrowser()
-    const normalizedEmail = email.trim().toLowerCase()
-    if (!normalizedEmail) {
-      setAuthError('メールアドレスを入力してください')
-      return
-    }
-
-    if (!isAllowedSchoolEmail(normalizedEmail)) {
-      setAuthError('校内メールアドレスでログインしてください')
-      return
-    }
-
     setAuthLoading(true)
     setAuthError('')
-    setAuthMessage('')
-
-    const { error: signInError } = await supabase.auth.signInWithOtp({
-      email: normalizedEmail,
+    const { error: signInError } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
       options: {
-        emailRedirectTo: window.location.origin,
+        redirectTo: window.location.origin,
       },
     })
-
     setAuthLoading(false)
-
     if (signInError) {
       setAuthError(signInError.message)
-      return
     }
-
-    setAuthMessage('ログインリンクを送信しました。メールを確認してください。')
   }
 
   async function handleSignOut() {
     const supabase = getSupabaseBrowser()
     setAuthLoading(true)
     setAuthError('')
-    setAuthMessage('')
     await supabase.auth.signOut()
     setAuthLoading(false)
   }
@@ -325,35 +293,24 @@ export default function ReservationCalendar() {
       <div className="mx-auto flex min-h-screen max-w-2xl items-center px-4 py-10">
         <div className="w-full rounded-3xl border border-gray-200 bg-white p-8 shadow-sm">
           <p className="text-sm font-semibold text-blue-600">校内アカウント限定</p>
-          <h1 className="mt-2 text-2xl font-bold text-gray-900">理科講義室 予約システム</h1>
+          <h1 className="mt-2 text-2xl font-bold text-gray-900">理科講義室の予約システム</h1>
           <p className="mt-3 text-sm leading-6 text-gray-600">
-            閲覧・予約には校内メールアドレスでのログインが必要です。
-            {ALLOWED_EMAIL_DOMAINS.length > 0 &&
-              ` 許可ドメイン: ${ALLOWED_EMAIL_DOMAINS.map((domain) => `@${domain}`).join(', ')}`}
+            閲覧・予約には校内Googleアカウント（@stg.nada.ac.jp）でのログインが必要です。
           </p>
           <div className="mt-6 space-y-3">
-            <label className="block text-sm font-medium text-gray-700">校内メールアドレス</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
-                  void handleSignIn()
-                }
-              }}
-              placeholder="example@school.ac.jp"
-              className="w-full rounded-2xl border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-              autoComplete="email"
-            />
             {authError && <p className="text-sm text-red-500">{authError}</p>}
-            {authMessage && <p className="text-sm text-emerald-600">{authMessage}</p>}
             <button
               onClick={() => void handleSignIn()}
               disabled={authLoading}
-              className="w-full rounded-2xl bg-gray-900 py-3 text-sm font-bold text-white disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-3 rounded-2xl border border-gray-300 bg-white py-3 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 disabled:opacity-50"
             >
-              {authLoading ? '送信中...' : 'ログインリンクを送る'}
+              <svg className="h-5 w-5" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+              {authLoading ? 'リダイレクト中...' : 'Googleアカウントでログイン'}
             </button>
           </div>
         </div>
